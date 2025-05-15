@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 15, 2025 at 01:36 AM
+-- Generation Time: May 15, 2025 at 04:23 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.2.17
 
@@ -111,6 +111,23 @@ CREATE TABLE `classrooms` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `discounts`
+--
+
+CREATE TABLE `discounts` (
+  `id` bigint UNSIGNED NOT NULL,
+  `school_id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('flat','percentage') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `failed_jobs`
 --
 
@@ -122,6 +139,25 @@ CREATE TABLE `failed_jobs` (
   `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fees`
+--
+
+CREATE TABLE `fees` (
+  `id` bigint UNSIGNED NOT NULL,
+  `school_id` bigint UNSIGNED NOT NULL,
+  `classroom_id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `session_id` bigint UNSIGNED NOT NULL,
+  `term_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -312,6 +348,46 @@ CREATE TABLE `student_classrooms` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `student_discounts`
+--
+
+CREATE TABLE `student_discounts` (
+  `id` bigint UNSIGNED NOT NULL,
+  `school_id` bigint UNSIGNED NOT NULL,
+  `student_id` bigint UNSIGNED NOT NULL,
+  `discount_id` bigint UNSIGNED NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `session_id` bigint UNSIGNED NOT NULL,
+  `term_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student_payments`
+--
+
+CREATE TABLE `student_payments` (
+  `id` bigint UNSIGNED NOT NULL,
+  `school_id` bigint UNSIGNED NOT NULL,
+  `student_id` bigint UNSIGNED NOT NULL,
+  `fee_id` bigint UNSIGNED NOT NULL,
+  `amount_paid` decimal(10,2) NOT NULL,
+  `payment_date` date NOT NULL,
+  `payment_method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reference` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `session_id` bigint UNSIGNED NOT NULL,
+  `term_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `student_subjects`
 --
 
@@ -405,6 +481,47 @@ CREATE TABLE `terms` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `timetables`
+--
+
+CREATE TABLE `timetables` (
+  `id` bigint UNSIGNED NOT NULL,
+  `school_id` bigint UNSIGNED NOT NULL,
+  `classroom_id` bigint UNSIGNED NOT NULL,
+  `subject_id` bigint UNSIGNED NOT NULL,
+  `teacher_id` bigint UNSIGNED NOT NULL,
+  `day_of_week` enum('Monday','Tuesday','Wednesday','Thursday','Friday') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `session_id` bigint UNSIGNED NOT NULL,
+  `term_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `total_grades`
+--
+
+CREATE TABLE `total_grades` (
+  `id` bigint UNSIGNED NOT NULL,
+  `school_id` bigint UNSIGNED NOT NULL,
+  `student_id` bigint UNSIGNED NOT NULL,
+  `subject_id` bigint UNSIGNED NOT NULL,
+  `average_score` decimal(5,2) DEFAULT NULL,
+  `grade_letter` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remarks` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `session_id` bigint UNSIGNED NOT NULL,
+  `term_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -470,11 +587,28 @@ ALTER TABLE `classrooms`
   ADD KEY `classrooms_school_id_foreign` (`school_id`);
 
 --
+-- Indexes for table `discounts`
+--
+ALTER TABLE `discounts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `discounts_school_id_foreign` (`school_id`);
+
+--
 -- Indexes for table `failed_jobs`
 --
 ALTER TABLE `failed_jobs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
+
+--
+-- Indexes for table `fees`
+--
+ALTER TABLE `fees`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fees_school_id_foreign` (`school_id`),
+  ADD KEY `fees_classroom_id_foreign` (`classroom_id`),
+  ADD KEY `fees_session_id_foreign` (`session_id`),
+  ADD KEY `fees_term_id_foreign` (`term_id`);
 
 --
 -- Indexes for table `grades`
@@ -567,6 +701,28 @@ ALTER TABLE `student_classrooms`
   ADD KEY `student_classrooms_term_id_foreign` (`term_id`);
 
 --
+-- Indexes for table `student_discounts`
+--
+ALTER TABLE `student_discounts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `student_discounts_school_id_foreign` (`school_id`),
+  ADD KEY `student_discounts_student_id_foreign` (`student_id`),
+  ADD KEY `student_discounts_discount_id_foreign` (`discount_id`),
+  ADD KEY `student_discounts_session_id_foreign` (`session_id`),
+  ADD KEY `student_discounts_term_id_foreign` (`term_id`);
+
+--
+-- Indexes for table `student_payments`
+--
+ALTER TABLE `student_payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `student_payments_school_id_foreign` (`school_id`),
+  ADD KEY `student_payments_student_id_foreign` (`student_id`),
+  ADD KEY `student_payments_fee_id_foreign` (`fee_id`),
+  ADD KEY `student_payments_session_id_foreign` (`session_id`),
+  ADD KEY `student_payments_term_id_foreign` (`term_id`);
+
+--
 -- Indexes for table `student_subjects`
 --
 ALTER TABLE `student_subjects`
@@ -620,6 +776,29 @@ ALTER TABLE `terms`
   ADD KEY `terms_school_id_foreign` (`school_id`);
 
 --
+-- Indexes for table `timetables`
+--
+ALTER TABLE `timetables`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `timetables_school_id_foreign` (`school_id`),
+  ADD KEY `timetables_classroom_id_foreign` (`classroom_id`),
+  ADD KEY `timetables_subject_id_foreign` (`subject_id`),
+  ADD KEY `timetables_teacher_id_foreign` (`teacher_id`),
+  ADD KEY `timetables_session_id_foreign` (`session_id`),
+  ADD KEY `timetables_term_id_foreign` (`term_id`);
+
+--
+-- Indexes for table `total_grades`
+--
+ALTER TABLE `total_grades`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `total_grades_school_id_foreign` (`school_id`),
+  ADD KEY `total_grades_student_id_foreign` (`student_id`),
+  ADD KEY `total_grades_subject_id_foreign` (`subject_id`),
+  ADD KEY `total_grades_session_id_foreign` (`session_id`),
+  ADD KEY `total_grades_term_id_foreign` (`term_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -656,9 +835,21 @@ ALTER TABLE `classrooms`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `discounts`
+--
+ALTER TABLE `discounts`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `failed_jobs`
 --
 ALTER TABLE `failed_jobs`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `fees`
+--
+ALTER TABLE `fees`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -677,7 +868,7 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `notices`
@@ -713,6 +904,18 @@ ALTER TABLE `students`
 -- AUTO_INCREMENT for table `student_classrooms`
 --
 ALTER TABLE `student_classrooms`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `student_discounts`
+--
+ALTER TABLE `student_discounts`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `student_payments`
+--
+ALTER TABLE `student_payments`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -752,6 +955,18 @@ ALTER TABLE `terms`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `timetables`
+--
+ALTER TABLE `timetables`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `total_grades`
+--
+ALTER TABLE `total_grades`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -788,6 +1003,21 @@ ALTER TABLE `attendance_records`
 --
 ALTER TABLE `classrooms`
   ADD CONSTRAINT `classrooms_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `discounts`
+--
+ALTER TABLE `discounts`
+  ADD CONSTRAINT `discounts_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `fees`
+--
+ALTER TABLE `fees`
+  ADD CONSTRAINT `fees_classroom_id_foreign` FOREIGN KEY (`classroom_id`) REFERENCES `classrooms` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fees_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fees_session_id_foreign` FOREIGN KEY (`session_id`) REFERENCES `school_sessions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fees_term_id_foreign` FOREIGN KEY (`term_id`) REFERENCES `terms` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `grades`
@@ -834,6 +1064,26 @@ ALTER TABLE `student_classrooms`
   ADD CONSTRAINT `student_classrooms_term_id_foreign` FOREIGN KEY (`term_id`) REFERENCES `terms` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `student_discounts`
+--
+ALTER TABLE `student_discounts`
+  ADD CONSTRAINT `student_discounts_discount_id_foreign` FOREIGN KEY (`discount_id`) REFERENCES `discounts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_discounts_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_discounts_session_id_foreign` FOREIGN KEY (`session_id`) REFERENCES `school_sessions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_discounts_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_discounts_term_id_foreign` FOREIGN KEY (`term_id`) REFERENCES `terms` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `student_payments`
+--
+ALTER TABLE `student_payments`
+  ADD CONSTRAINT `student_payments_fee_id_foreign` FOREIGN KEY (`fee_id`) REFERENCES `fees` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_payments_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_payments_session_id_foreign` FOREIGN KEY (`session_id`) REFERENCES `school_sessions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_payments_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_payments_term_id_foreign` FOREIGN KEY (`term_id`) REFERENCES `terms` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `student_subjects`
 --
 ALTER TABLE `student_subjects`
@@ -878,6 +1128,27 @@ ALTER TABLE `teacher_subjects`
 --
 ALTER TABLE `terms`
   ADD CONSTRAINT `terms_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `timetables`
+--
+ALTER TABLE `timetables`
+  ADD CONSTRAINT `timetables_classroom_id_foreign` FOREIGN KEY (`classroom_id`) REFERENCES `classrooms` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `timetables_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `timetables_session_id_foreign` FOREIGN KEY (`session_id`) REFERENCES `school_sessions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `timetables_subject_id_foreign` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `timetables_teacher_id_foreign` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `timetables_term_id_foreign` FOREIGN KEY (`term_id`) REFERENCES `terms` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `total_grades`
+--
+ALTER TABLE `total_grades`
+  ADD CONSTRAINT `total_grades_school_id_foreign` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `total_grades_session_id_foreign` FOREIGN KEY (`session_id`) REFERENCES `school_sessions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `total_grades_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `total_grades_subject_id_foreign` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `total_grades_term_id_foreign` FOREIGN KEY (`term_id`) REFERENCES `terms` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `users`

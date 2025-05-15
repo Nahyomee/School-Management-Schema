@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Student;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -29,8 +30,14 @@ class DatabaseSeeder extends Seeder
             AssessmentSeeder::class,
             GradeSeeder::class,
 
+            FeeSeeder::class,
+            DiscountSeeder::class,
+            StudentPaymentSeeder::class,
+            StudentDiscountSeeder::class,
+
             NoticeSeeder::class,
             AttendanceRecordSeeder::class,
+            TimetableSeeder::class,
 
         ]);
     }
